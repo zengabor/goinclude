@@ -11,7 +11,9 @@ Example:
 
 Where inside the `templates/main.gohtml` you reference other files via `{{ include ... }}`, e.g.,
 
-    <style>{{ include "css/inline-styles.css" }}</style>
+    <style>{{include "css/inline-styles.css"}}</style>
+	
+Limitation: currently no variations are supported inside the curly brackets, so don’t use dashes.
 
 ## Install
 
