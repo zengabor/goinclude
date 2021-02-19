@@ -61,26 +61,25 @@ func includeFiles(pathToTemplate, pathToOutputFile string) {
 	}
 }
 
-func getFileContent(filePath string) (s string, err error) {
-	p := getFullPath(filePath)
-	b, err := ioutil.ReadFile(p)
+func getFileContent(filePath string) (string, error) {
+	b, err := ioutil.ReadFile(getFullPath(filePath))
 	if err != nil {
-		return
+		return "", err
 	}
 	return string(b), nil
 }
 
 func getFullPath(pathToFile string) string {
-	workingDirectory, err := os.Getwd()
-	if err != nil {
-		log.Fatal(fmt.Sprintf("%s: could not get working directory: %s\n", appName, err))
-	}
 	if !strings.HasPrefix(pathToFile, "/") {
+		workingDirectory, err := os.Getwd()
+		if err != nil {
+			log.Fatal(fmt.Sprintf("%s: getting working directory: %s\n", appName, err))
+		}
 		pathToFile = path.Join(workingDirectory, pathToFile)
 	}
 	s, err := filepath.Abs(pathToFile)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("%s: could not resolve full path: %s\n", appName, err))
+		log.Fatal(fmt.Sprintf("%s: resolving full path: %s\n", appName, err))
 	}
 	return s
 }
