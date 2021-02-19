@@ -23,16 +23,16 @@ func main() {
 	case len(os.Args) == 1:
 		help()
 	case len(os.Args) == 3:
-		includeFiles(os.Args[1], os.Args[2])
+		mustIncludeFiles(os.Args[1], os.Args[2])
 	default:
-		log.Fatal(appName + ": provide input file path and output file path as parameters")
+		log.Fatalf("%s: provide input file path and output file path as parameters", appName)
 	}
 }
 
-func includeFiles(pathToTemplate, pathToOutputFile string) {
+func mustIncludeFiles(pathToTemplate, pathToOutputFile string) {
 	tmpl, err := getFileContent(pathToTemplate)
 	if err != nil {
-		log.Fatal(appName + ": could not read " + pathToTemplate)
+		log.Fatalf("%s: could not read %q", appName, pathToTemplate)
 	}
 	var includedFiles []string
 	var get = func(filePath string) (s string, err error) {
@@ -57,7 +57,7 @@ func includeFiles(pathToTemplate, pathToOutputFile string) {
 		fmt.Println(strings.Join(includedFiles, " "))
 	}
 	if err := ioutil.WriteFile(pathToOutputFile, []byte(out), 0644); err != nil {
-		log.Fatal(appName + ": error writing " + pathToOutputFile)
+		log.Fatalf("%s: error writing %q", appName, pathToOutputFile)
 	}
 }
 
@@ -73,13 +73,13 @@ func getFullPath(pathToFile string) string {
 	if !strings.HasPrefix(pathToFile, "/") {
 		workingDirectory, err := os.Getwd()
 		if err != nil {
-			log.Fatal(fmt.Sprintf("%s: getting working directory: %s\n", appName, err))
+			log.Fatalf("%s: getting working directory: %s\n", appName, err)
 		}
 		pathToFile = path.Join(workingDirectory, pathToFile)
 	}
 	s, err := filepath.Abs(pathToFile)
 	if err != nil {
-		log.Fatal(fmt.Sprintf("%s: resolving full path: %s\n", appName, err))
+		log.Fatalf("%s: resolving full path: %s\n", appName, err)
 	}
 	return s
 }
