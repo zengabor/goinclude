@@ -13,7 +13,7 @@ import (
 
 const (
 	appName = "goinclude"
-	version = "1.0"
+	version = "1.1"
 )
 
 var re = regexp.MustCompile(`{{\s*include\s+"([^"]+)"\s*}}`)
@@ -43,13 +43,14 @@ func mustIncludeFiles(pathToTemplate, pathToOutputFile string) {
 		includedFiles = append(includedFiles, filePath)
 		return string(b), nil
 	}
+	var errors []string
 	out := re.ReplaceAllStringFunc(tmpl, func(s string) string {
-		c, err := get(re.ReplaceAllString(s, "$1"))
+		toBeIncludedFilePath := re.ReplaceAllString(s, "$1")
+		c, err := get(toBeIncludedFilePath)
 		if err != nil {
-			return fmt.Sprintf(
-				"(%s: error including %s into %s: %s)",
-				appName, getFullPath(pathToTemplate), pathToTemplate, err,
-			)
+			e := fmt.Sprintf("error in %s: %s", pathToTemplate, err)
+			errors = append(errors, e)
+			return fmt.Sprintf("(%s: %s)", appName, e)
 		}
 		return c
 	})
@@ -58,6 +59,9 @@ func mustIncludeFiles(pathToTemplate, pathToOutputFile string) {
 	}
 	if err := ioutil.WriteFile(pathToOutputFile, []byte(out), 0644); err != nil {
 		log.Fatalf("%s: error writing %q", appName, pathToOutputFile)
+	}
+	if len(errors) > 0 {
+		log.Fatalf("%s: \n - %v", appName, strings.Join(errors, "\n - "))
 	}
 }
 
@@ -90,8 +94,8 @@ Includes the content of the indicated files into a go template and outputs the m
 
 This is how you include a file inside a template: {{ include "path/otherfile.html" }}
 
-Usage:    %[1]s <path-to-template> <output-path>
-e.g.,     %[1]s templates/main.gohtml templates/main.html
+  Usage:  %[1]s <path-to-template> <output-path>
+  E.g.,   %[1]s templates/main.gohtml templates/main.html
 
 `, appName, version)
 }
